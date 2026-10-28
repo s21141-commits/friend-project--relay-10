@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>릴레이 10자 완성하기</title>
+<style>
+:root{--bg:#fff7e6;--card:#fff;--text:#3a2e1f;--accent:#ff7a3d;--sub:#8a7a63;--box:#ffe9c7;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1e1a14;--card:#2b251c;--text:#f5ead8;--accent:#ff9158;--sub:#b5a589;--box:#3a3123}}
+:root[data-theme="dark"]{--bg:#1e1a14;--card:#2b251c;--text:#f5ead8;--accent:#ff9158;--sub:#b5a589;--box:#3a3123}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+main{max-width:560px;margin:0 auto;padding:20px 16px;text-align:center}
+h1{font-size:1.6rem;margin:8px 0}
+.desc{color:var(--sub);font-size:.95rem;line-height:1.5}
+.card{background:var(--card);border-radius:20px;padding:24px 16px;margin:20px 0;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.label{color:var(--sub);font-size:.9rem}
+#topic{font-size:1.7rem;font-weight:800;color:var(--accent);margin:14px 0;min-height:3.6rem;display:flex;align-items:center;justify-content:center;word-break:keep-all}
+.boxes{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+.b{width:40px;height:40px;border-radius:8px;background:var(--box);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:var(--sub)}
+button{font-size:1.2rem;font-weight:700;border:0;border-radius:14px;padding:14px 28px;background:var(--accent);color:#fff;cursor:pointer}
+button:active{transform:scale(.97)}
+.b.f{background:var(--accent);color:#fff;font-size:1.3rem}
+#sent{width:100%;margin-top:16px;font-size:1.2rem;padding:12px;border-radius:12px;border:2px solid var(--box);background:var(--bg);color:var(--text);text-align:center;font-family:inherit}
+#sent:focus{outline:none;border-color:var(--accent)}
+#status{margin-top:10px;font-weight:700}
+#clr{font-size:.9rem;padding:8px 16px;margin-top:10px;background:var(--box);color:var(--text)}
+#hist{color:var(--sub);font-size:.85rem;margin-top:16px;line-height:1.6}
+</style>
+</head>
+<body>
+<main>
+<h1>✏️ 릴레이 10자 완성하기</h1>
+<p class="desc">종이에 한 글자씩 번갈아 적어서<br>10글자 문장을 완성해요!<br>(A: '우', B: '리', A: '반', B: '은'…)</p>
+<div class="card">
+<div class="label">오늘의 주제</div>
+<div id="topic">버튼을 눌러요!</div>
+<div class="boxes" id="boxes"></div>
+<input id="sent" type="text" placeholder="여기에 글자를 적어요 (최대 10글자)" autocomplete="off">
+<div id="status"></div>
+<button id="clr">🧹 지우기</button>
+</div>
+<button id="btn">🎲 주제 뽑기</button>
+<div id="hist"></div>
+</main>
+<script>
+const topics=["우리 반의 가장 큰 장점","선생님에게 하고 싶은 말","쉬는 시간에 하고 싶은 것","급식 시간에 있었던 일들","6학년 생활을 잘하는 법","주말에 가장 하고 싶은 것","내가 가장 좋아하는 음식","요즘 내가 빠져있는 취미","스트레스를 해소하는 방법","집에 돌아가서 하고 싶은 일","내가 초능력을 갖게 된다면","짝꿍을 칭찬한다면","타임머신을 타고 간다면","무인도에 가져갈 한 가지","중학생이 된 나의 모습은"];
+const boxes=document.getElementById('boxes');
+const cells=[];
+for(let i=0;i<10;i++){const d=document.createElement('div');d.className='b';boxes.appendChild(d);cells.push(d);}
+const sent=document.getElementById('sent'),status=document.getElementById('status');
+function render(){
+  const ch=Array.from(sent.value.replace(/\s/g,'')).slice(0,10);
+  cells.forEach((d,i)=>{
+    const lab=(i%2===0?'A':'B')+(Math.floor(i/2)+1);
+    d.textContent=ch[i]||lab;d.classList.toggle('f',!!ch[i]);
+  });
+  status.textContent=ch.length<10?'다음 글자: '+(ch.length%2===0?'A':'B')+' 차례 ('+ch.length+'/10)':'🎉 10글자 완성!';
+}
+sent.addEventListener('input',e=>{
+  if(!e.isComposing){const t=Array.from(sent.value.replace(/\s/g,'')).slice(0,10).join('');if(t!==sent.value)sent.value=t;}
+  render();
+});
+sent.addEventListener('compositionend',()=>{sent.value=Array.from(sent.value.replace(/\s/g,'')).slice(0,10).join('');render();});
+document.getElementById('clr').onclick=()=>{sent.value='';render();sent.focus();};
+render();
+const topicEl=document.getElementById('topic'),btn=document.getElementById('btn'),hist=document.getElementById('hist');
+let last=-1,past=[],busy=false;
+btn.onclick=()=>{
+  if(busy)return;busy=true;
+  let n=0;
+  const iv=setInterval(()=>{
+    topicEl.textContent=topics[Math.floor(Math.random()*topics.length)];
+    if(++n>=15){
+      clearInterval(iv);
+      let i;do{i=Math.floor(Math.random()*topics.length)}while(i===last);
+      last=i;topicEl.textContent=topics[i];sent.value='';render();
+      past.unshift(topics[i]);
+      hist.textContent=past.length>1?'지난 주제: '+past.slice(1,4).join(' / '):'';
+      btn.textContent='🎲 다시 뽑기';busy=false;
+    }
+  },80);
+};
+</script>
+</body>
+</html>
